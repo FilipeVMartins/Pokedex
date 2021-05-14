@@ -6,7 +6,7 @@ export default class App extends React.Component {
 
   state = {
     pTypes: [],
-
+    
     pNames: [],
     pNamesSearched: [],
     pRequestedList: [],
@@ -32,10 +32,10 @@ export default class App extends React.Component {
       let pTypes = response[1].results.map((type) => {
         return type.name;
       })
-      // set type list and pokemon list to be searched
-      this.setState({pTypes:pTypes, pNames:response[0].results}, this.getRequestedList)
-
-      
+      // set type list
+      this.setState({pTypes:pTypes})
+      // set pokemon list to be searched
+      this.setState({pNames:response[0].results})
 
       // none of this would work becaouse bot all pokemons are indexed in its api type pokemon list
       // // each object in this array will recieve one more element containing the types of its pokemon after the next request
@@ -95,12 +95,12 @@ export default class App extends React.Component {
     this.setState({inputedText:evt.target.value})
 
     // starts pokemon filtering search and requests after a minimum input of characters
-    if (evt.target.value.length != 0 ){
+    if (evt.target.value.length > 1 ){
       
       // searched list
       let pNamesSearched = [];
       // loop pokemons list
-      Object.entries(this.state.pRequestedList).forEach(([key, pokemon]) => {
+      Object.entries(this.state.pNames).forEach(([key, pokemon]) => {
 
         // if inputed value matches pokemons name
         if (pokemon.name.includes(evt.target.value)){
@@ -112,12 +112,12 @@ export default class App extends React.Component {
       });
 
       // saves pNamesSearched to state
-      this.setState({pNamesSearched: pNamesSearched}, ()=>console.log(this.state.pNamesSearched));
+      this.setState({pNamesSearched: pNamesSearched}, this.getRequestedList);
       
 
     } else {
       // if less than defined before, clear results
-      this.setState({pNamesSearched: []}, ()=>console.log(this.state.pNamesSearched) );
+      this.setState({pNamesSearched: []}, this.getRequestedList);
     }
   };
 
@@ -126,15 +126,14 @@ export default class App extends React.Component {
     // pokemon query list
     let resourceStringList = [];
     // after building the 'pNamesSearched' searched locally on 'pNames', the program will use 'pNamesSearched' to bring the full data of each pokemon inside of it to the 'pRequestedList' state key, since it's a limitation of the API
-
-    Object.entries(this.state.pNames).forEach(([key, pokemon]) => {
+    this.state.pNamesSearched.forEach((pokemon) => {
       // if pokemon not requested yet
-      //if( !this.checkPokemonRequested(pokemon.name) ){
+      if( !this.checkPokemonRequested(pokemon.name) ){
         // then add it to request
 
         // build the resource string list
-      resourceStringList.push(pokemon.url);
-      //};
+        resourceStringList.push(pokemon.url);
+      };
     });
 
     const Pokedex = require("pokeapi-js-wrapper")
@@ -142,7 +141,7 @@ export default class App extends React.Component {
     // make the request with the created resourceStringList
     P.resource(resourceStringList).then( response => {
       // add the requested results to 'pRequestedList'
-      this.setState({pRequestedList: response}, () => console.log('loading finished'));
+      this.setState({pRequestedList: response});
     });
   }
 
@@ -197,18 +196,15 @@ export default class App extends React.Component {
         <div className="app-content">
           <div className="pokemon-results">
 
-            { this.state.pNamesSearched.length != 0 ?
-              this.state.pNamesSearched.map( (pokemonData, index) => {
+            { this.state.pRequestedList.length != 0 ?
+              this.state.pRequestedList.map( (pokemonData, index) => {
                 // because it starts rendering 6 rows by default
                 if (true){
 
 
                   return (
                     <div className="pokemon-box" key={'pokemon-box-' + index}>
-                      <figure>
-                          <img src={pokemonData.sprites.front_default} alt="Elephant at sunset" />
-                          <figcaption>{pokemonData.name}</figcaption>
-                      </figure>
+                      {pokemonData.name}
                       {pokemonData.types[0].type.name}
                     </div>
                   )
