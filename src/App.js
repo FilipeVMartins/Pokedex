@@ -6,28 +6,20 @@ export default class App extends React.Component {
 
   state = {
     pTypes: [],
+    
     pNames: [],
     pNamesSearched: [],
     pRequestedList: [],
+
     selectedTypes: [],
     inputedText: ''
   }
-
-
-  // shouldComponentUpdate(nextProps, nextState) { 
-  //   if (nextState.pNamesAndTypes) { 
-  //     return false;
-  //   }
-  //   return true;
-  // }
-
 
   async componentDidMount(){
 
     // acording to pokeapi rules, results must be cashed to avoid IP address getting permanently banned. 'pokeapi-js-wrapper' is a library recomended in the docs to perform the caching, both json and images results.
     const Pokedex = require("pokeapi-js-wrapper")
     const P = new Pokedex.Pokedex()
-
 
     P.resource([
       // gets all the pokemons names in an array
@@ -81,19 +73,6 @@ export default class App extends React.Component {
     });
   };
 
-  // // gets all data of one pokemon
-  // getOnePokemonData = (pokemonName) => {
-  //   const Pokedex = require("pokeapi-js-wrapper")
-  //   const P = new Pokedex.Pokedex()
-  //   P.getPokemonByName(pokemonName)
-  //   .then(function(response) {
-  //     return response
-  //   });
-  // };
-
-
-
-
   changeSelectedTypes = (type) => {
 
     // get state
@@ -116,7 +95,7 @@ export default class App extends React.Component {
     this.setState({inputedText:evt.target.value})
 
     // starts pokemon filtering search and requests after a minimum input of characters
-    if (evt.target.value.length >= 2){
+    if (evt.target.value.length != 0 ){
       
       // searched list
       let pNamesSearched = [];
@@ -128,20 +107,22 @@ export default class App extends React.Component {
 
           // push pokemon given registry to searched list
           pNamesSearched.push(pokemon);
+          
         };
       });
 
       // saves pNamesSearched to state
-      this.setState({pNamesSearched});
-    } else {
+      this.setState({pNamesSearched: pNamesSearched}, this.getRequestedList);
+      
+
+    } else if (evt.target.value.length == 0) {
       // if less than defined before, clear results
-      this.setState({pNamesSearched: []});
+      this.setState({pNamesSearched: []}, this.getRequestedList);
     }
+  };
 
-
-
-    // re-use alrdy requested pokemons
-    let pRequestedList = this.state.pRequestedList;
+  // executed fater pNamesSearched is set
+  getRequestedList = () => {
     // pokemon query list
     let resourceStringList = [];
     // after building the 'pNamesSearched' searched locally on 'pNames', the program will use 'pNamesSearched' to bring the full data of each pokemon inside of it to the 'pRequestedList' state key, since it's a limitation of the API
@@ -159,31 +140,33 @@ export default class App extends React.Component {
     const P = new Pokedex.Pokedex()
     // make the request with the created resourceStringList
     P.resource(resourceStringList).then( response => {
-      console.log(response)
       // add the requested results to 'pRequestedList'
-      this.setState({pRequestedList: [...this.state.pRequestedList ,...response]});
-
-      console.log(this.state.pRequestedList)
+      this.setState({pRequestedList: response});
     });
+  }
 
-
-    
-    //getOnePokemonData
-
-  };
 
   checkPokemonRequested = (nametoCheck) => {
     this.state.pRequestedList.forEach((pokemon) => {
-
       if(pokemon != undefined){
         if(pokemon.name == nametoCheck){
           return true;
         };
       };
     });
-
     return false;
   };
+
+  // // gets all data of one pokemon from local 'pRequestedList'
+  // getOnePokemonData = (pokemonName) => {
+  //   //console.log(pokemonName)
+  //   this.state.pNamesSearched.forEach((pokemon) => {
+  //     if (pokemon.name == pokemonName){
+  //       return true;
+  //     }
+  //   })
+  //   return false
+  // };
 
 
 
@@ -195,7 +178,7 @@ export default class App extends React.Component {
         <header className="app-header">
           <h1 onClick={() => console.log(this.state.pRequestedList)}>Pokédex</h1>
           <form>
-            <input type="text" value={this.state.inputedText} onChange={(evt) => this.onChangeInputHandler(evt) }></input>
+            <input type="text" value={this.state.inputedText} onChange={this.onChangeInputHandler}></input>
             <div className="select-pokemon-types">
               <h4>Selecione os tipos</h4>
               <div className="pokemon-types">
@@ -206,10 +189,6 @@ export default class App extends React.Component {
                 })}
               </div>
             </div>
-            {/* <div className="buttons">
-              <button type="submit">Pesquisar</button>
-              <button type="reset">Limpar</button>
-            </div> */}
           </form>
         </header>
 
@@ -217,18 +196,18 @@ export default class App extends React.Component {
         <div className="app-content">
           <div className="pokemon-results">
 
-            { this.state.pNamesSearched.length != 0 ?
-              this.state.pNamesSearched.map( (pokemon, index) => {
+            { this.state.pRequestedList.length != 0 ?
+              this.state.pRequestedList.map( (pokemonData, index) => {
                 // because it starts rendering 6 rows by default
                 if (true){
 
 
-
-                    return (
-                      <div className="pokemon-box" key={'pokemon-box-' + index}>
-                        {pokemon.name}
-                      </div>
-                    )
+                  return (
+                    <div className="pokemon-box" key={'pokemon-box-' + index}>
+                      {pokemonData.name}
+                      {pokemonData.types[0].type.name}
+                    </div>
+                  )
                 };
               })
             : ''}
