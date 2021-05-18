@@ -159,7 +159,6 @@ export default class App extends React.Component {
     });
   }
 
-
   checkPokemonRequested = (nametoCheck) => {
     this.state.pRequestedList.forEach((pokemon) => {
       if(pokemon != undefined){
@@ -173,8 +172,6 @@ export default class App extends React.Component {
 
   // removes non-selected pokemon types from 'pRequestedList' after it's been set
   pTypesFilter = (pokemon) => {
-    
-
     // if none type selected, then return all
     if ( this.state.selectedTypes.length == 0 ){
       return true
@@ -199,21 +196,8 @@ export default class App extends React.Component {
         } else {
           return false
         };
-      //});
-      //this.setState({pRequestedList:pRequestedListFiltered})
     };
   };
-
-  // // gets all data of one pokemon from local 'pRequestedList'
-  // getOnePokemonData = (pokemonName) => {
-  //   //console.log(pokemonName)
-  //   this.state.pNamesSearched.forEach((pokemon) => {
-  //     if (pokemon.name == pokemonName){
-  //       return true;
-  //     }
-  //   })
-  //   return false
-  // };
 
   clearResults = () => {
     // if less than defined before, clear results
@@ -229,12 +213,9 @@ export default class App extends React.Component {
       top: 0,
       behavior: 'smooth'
     });
-    
-    
   }
 
   functionDisplayTypeMenu = () => {
-
     if (this.state.displayTypeMenu) {
       this.setState({displayTypeMenu: false})
       return
@@ -252,10 +233,7 @@ export default class App extends React.Component {
     return string.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
   };
 
-
-
   render() {
-
     return (
       <div className="app">
 
@@ -269,7 +247,8 @@ export default class App extends React.Component {
 
               <h4 onClick={this.functionDisplayTypeMenu} className={`${this.state.displayTypeMenu ? 'select-type-clicked' : ''}`} >Select Pokémon Types</h4>
 
-              <div className={`pokemon-types ${this.state.displayTypeMenu ? 'openned' : ''}`}            > 
+              <div className={`pokemon-types ${this.state.displayTypeMenu ? 'openned' : ''}`}> 
+                {/* choose pokemon types to be rendered */}
                 {this.state.pTypes.map((type) => {
                   return (
                     <div key={`type-${type}`} className={`select-type ${type} ${this.state.selectedTypes.indexOf(type) !== -1 ? 'selected' : ''}`} onClick={() => this.changeSelectedTypes(type)} >{this.capitalizeFirstLetter(type)}</div>
@@ -292,18 +271,17 @@ export default class App extends React.Component {
 
             { this.state.pRequestedList.length != 0 ?
               this.state.pRequestedList.map( (pokemonData, index) => {
-                // because it starts rendering 6 rows by default
+                // apply type filter on pokemon boxes
                 if (this.pTypesFilter(pokemonData)){
-
-
                   return (
                     <div className="pokemon-box" key={'pokemon-box-' + index}>
                       <figure>
                         <img src={pokemonData.sprites.front_default} alt="Trulli" />
                         <figcaption className="pokemon-name">{this.capitalizeWords(pokemonData.name.replace(/\-/g, " "))}</figcaption>
                       </figure>
-
+                      
                       <div className="id-pokemon-types">
+                          {/* render the pokemon types */}
                           { pokemonData.types.map ( (type, index) => {
                             return (
                               <div className="pokemon-type" key={'pokemon-type'+index}>{type.type.name}</div>
@@ -317,12 +295,6 @@ export default class App extends React.Component {
                 };
               })
             : <strong className="result-not-found">No Pokémon Found!</strong>}
-
-
-
-
-
-
           </div>
         </div>
       
